@@ -1,5 +1,5 @@
 {
-  "name": "temp-app",
+  "name": "ser-canino",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,11 +9,17 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.576.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-leaflet": "^5.0.0",
+    "react-qr-code": "^2.0.18"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
