@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertCircle, Heart, LogOut, User } from 'lucide-react';
+import { AlertCircle, LogOut, User, Menu, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import AuthModal from './AuthModal';
 import ReportModal from './ReportModal';
@@ -9,7 +9,9 @@ import Image from 'next/image';
 
 export default function Header() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authModalIsLogin, setAuthModalIsLogin] = useState(true);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [user, setUser] = useState<any>(null);
 
@@ -43,6 +45,13 @@ export default function Header() {
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
+        setIsMobileMenuOpen(false);
+    };
+
+    const openAuthModal = (isLogin: boolean) => {
+        setAuthModalIsLogin(isLogin);
+        setIsAuthModalOpen(true);
+        setIsMobileMenuOpen(false);
     };
 
     return (
@@ -61,7 +70,8 @@ export default function Header() {
                     <span>Ser Canino</span>
                 </div>
 
-                <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                {/* Desktop Navigation */}
+                <nav className="desktop-only" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <button onClick={() => window.location.href = '/'} className="btn-secondary" style={{ fontSize: '0.875rem', padding: '0.5rem 1rem', border: 'none', background: 'transparent' }}>
                         Mapa
                     </button>
@@ -91,14 +101,69 @@ export default function Header() {
                             </button>
                         </div>
                     ) : (
-                        <button onClick={() => setIsAuthModalOpen(true)} style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-main)' }}>
-                            Iniciar Sesión
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <button onClick={() => openAuthModal(true)} style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-main)' }}>
+                                Iniciar Sesión
+                            </button>
+                            <button onClick={() => openAuthModal(false)} className="btn-secondary" style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}>
+                                Registrarse
+                            </button>
+                        </div>
                     )}
                 </nav>
+
+                {/* Mobile Menu Toggle Button */}
+                <button
+                    className="mobile-only"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    style={{ color: 'var(--primary-color)', padding: '0.5rem' }}
+                >
+                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+
+                {/* Mobile Dropdown Menu */}
+                {isMobileMenuOpen && (
+                    <div className="mobile-only mobile-menu">
+                        <button onClick={() => { window.location.href = '/'; setIsMobileMenuOpen(false); }} style={{ fontWeight: 600, padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
+                            Mapa Principal
+                        </button>
+                        <button onClick={() => { window.location.href = '/adopciones'; setIsMobileMenuOpen(false); }} style={{ fontWeight: 600, padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
+                            Adopciones
+                        </button>
+                        <button onClick={() => { window.location.href = '/'; setIsMobileMenuOpen(false); }} style={{ fontWeight: 600, padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
+                            Guardería
+                        </button>
+
+                        <button onClick={() => { handleEmitirAlerta(); setIsMobileMenuOpen(false); }} className="btn-primary" style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
+                            <AlertCircle size={16} /> Emitir Alerta
+                        </button>
+
+                        <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }} />
+
+                        {user ? (
+                            <>
+                                <button onClick={() => { window.location.href = '/perfil'; setIsMobileMenuOpen(false); }} style={{ fontWeight: 600, padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)' }}>
+                                    <User size={18} /> Mi Credencial
+                                </button>
+                                <button onClick={handleSignOut} style={{ fontWeight: 600, padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                    <LogOut size={18} /> Cerrar Sesión
+                                </button>
+                            </>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <button onClick={() => openAuthModal(true)} style={{ fontWeight: 600, padding: '0.75rem', color: 'var(--text-main)', backgroundColor: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
+                                    Iniciar Sesión
+                                </button>
+                                <button onClick={() => openAuthModal(false)} className="btn-primary" style={{ justifyContent: 'center' }}>
+                                    Registrarse Hoy
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </header>
 
-            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} initialIsLogin={authModalIsLogin} />
             <ReportModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} userLocation={userLocation} />
         </>
     );

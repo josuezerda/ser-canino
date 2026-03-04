@@ -3,18 +3,33 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { X, Mail, Lock } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialIsLogin?: boolean;
 }
 
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
-    const [isLogin, setIsLogin] = useState(true);
+export default function AuthModal({ isOpen, onClose, initialIsLogin = true }: AuthModalProps) {
+    const [isLogin, setIsLogin] = useState(initialIsLogin);
+
+    // Sync isLogin state when modal opens
+    import('react').then((React) => {
+        React.useEffect(() => {
+            if (isOpen) {
+                setIsLogin(initialIsLogin);
+            }
+        }, [isOpen, initialIsLogin]);
+    });
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+    const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    const isSubmitDisabled = loading || (!!turnstileSiteKey && !turnstileToken);
 
     if (!isOpen) return null;
 
@@ -107,7 +122,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem' }} disabled={loading}>
+                    {turnstileSiteKey && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                            <Turnstile
+                                siteKey={turnstileSiteKey}
+                                onSuccess={(token) => setTurnstileToken(token)}
+                            />
+                        </div>
+                    )}
+
+                    <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem' }} disabled={isSubmitDisabled}>
                         {loading ? 'Cargando...' : (isLogin ? 'Ingresar' : 'Registrarse')}
                     </button>
                 </form>

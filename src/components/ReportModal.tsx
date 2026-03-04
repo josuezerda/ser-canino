@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, MapPin, Camera, AlertTriangle } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { supabase } from '@/lib/supabase';
 
 interface ReportModalProps {
@@ -16,6 +17,10 @@ export default function ReportModal({ isOpen, onClose, userLocation }: ReportMod
     const [loading, setLoading] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+    const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    const isSubmitDisabled = loading || (!!turnstileSiteKey && !turnstileToken);
 
     if (!isOpen) return null;
 
@@ -189,7 +194,16 @@ export default function ReportModal({ isOpen, onClose, userLocation }: ReportMod
                         />
                     </div>
 
-                    <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1rem' }} disabled={loading}>
+                    {turnstileSiteKey && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                            <Turnstile
+                                siteKey={turnstileSiteKey}
+                                onSuccess={(token) => setTurnstileToken(token)}
+                            />
+                        </div>
+                    )}
+
+                    <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1rem' }} disabled={isSubmitDisabled}>
                         {loading ? 'Enviando...' : 'Publicar Alerta'}
                     </button>
                 </form>
