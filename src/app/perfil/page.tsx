@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
-import { Camera, MapPin, Key, Shield, AlertCircle, CheckCircle2, QrCode as QrCodeIcon } from 'lucide-react';
+import { Camera, MapPin, Key, Shield, ShieldAlert, AlertCircle, CheckCircle2, QrCode as QrCodeIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import QRCode from 'react-qr-code';
@@ -223,9 +223,24 @@ export default function ProfileDashboard() {
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>{breed || 'Mestizo'}</p>
 
                         {profile?.is_super_admin && (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#FEF2F2', color: '#DC2626', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700 }}>
-                                <Shield size={14} /> Súper Admin
-                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#FEF2F2', color: '#DC2626', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700 }}>
+                                    <Shield size={14} /> Súper Admin
+                                </span>
+                                <button
+                                    onClick={() => router.push('/superadmin')}
+                                    style={{
+                                        marginTop: '0.5rem', width: '100%', padding: '0.5rem', backgroundColor: '#18181B', color: 'white',
+                                        borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 600,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                        transition: 'var(--transition)'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#27272A'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#18181B'}
+                                >
+                                    <ShieldAlert size={16} color="#38BDF8" /> Centro de Comando
+                                </button>
+                            </div>
                         )}
                     </div>
 
