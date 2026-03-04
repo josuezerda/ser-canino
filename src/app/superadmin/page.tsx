@@ -62,6 +62,14 @@ export default function SuperAdminPage() {
         }
     };
 
+    // Búsqueda de usuarios
+    const [searchTerm, setSearchTerm] = useState('');
+    const filteredUsers = users.filter(u =>
+        (u.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (u.phone_number?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (u.id?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    );
+
     // --- REPORTS ---
     const deleteReport = async (id: string) => {
         if (!confirm('¿Estás seguro de eliminar este reporte de forma permanente?')) return;
@@ -349,7 +357,17 @@ export default function SuperAdminPage() {
                     {/* ===== TAB: USERS ===== */}
                     {activeTab === 'users' && (
                         <div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Gestión de Identidades (Tutor / Profesional)</h2>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Gestión de Identidades (Tutor / Profesional)</h2>
+                                <input
+                                    type="text"
+                                    placeholder="Buscar por nombre, teléfono o ID..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="input-field"
+                                    style={{ maxWidth: '300px' }}
+                                />
+                            </div>
                             <div style={{ overflowX: 'auto' }}>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                     <thead>
@@ -357,11 +375,11 @@ export default function SuperAdminPage() {
                                             <th style={{ padding: '1rem 0.5rem', color: 'var(--text-muted)' }}>Nombre y Contacto</th>
                                             <th style={{ padding: '1rem 0.5rem', color: 'var(--text-muted)' }}>Fecha Registro</th>
                                             <th style={{ padding: '1rem 0.5rem', color: 'var(--text-muted)' }}>Rol de Sistema (DB)</th>
-                                            <th style={{ padding: '1rem 0.5rem', color: 'var(--text-muted)', textAlign: 'right' }}>Rotar Rol</th>
+                                            <th style={{ padding: '1rem 0.5rem', color: 'var(--text-muted)', textAlign: 'right' }}>Cambiar Rol</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {users.map(u => (
+                                        {filteredUsers.map(u => (
                                             <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                                                 <td style={{ padding: '1rem 0.5rem' }}>
                                                     <strong style={{ display: 'block', fontSize: '0.875rem' }}>{u.full_name || 'Sin Nombre'}</strong>
@@ -382,20 +400,26 @@ export default function SuperAdminPage() {
                                                 </td>
                                                 <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
                                                     {u.system_role !== 'superadmin' ? (
-                                                        <button onClick={() => updateUserRole(u.id, u.system_role)} style={{
-                                                            padding: '0.25rem 0.75rem', fontSize: '0.75rem', fontWeight: 600,
-                                                            border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: 'transparent'
-                                                        }}>
-                                                            Cambiar Rol
-                                                        </button>
+                                                        <select
+                                                            value={u.system_role}
+                                                            onChange={(e) => updateUserRole(u.id, e.target.value)}
+                                                            className="input-field"
+                                                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', minWidth: '120px' }}
+                                                        >
+                                                            <option value="tutor">Tutor</option>
+                                                            <option value="colaborador">Colaborador</option>
+                                                            <option value="veterinaria">Veterinaria</option>
+                                                            <option value="moderador">Moderador</option>
+                                                            <option value="superadmin">Super Admin</option>
+                                                        </select>
                                                     ) : (
                                                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Protegido</span>
                                                     )}
                                                 </td>
                                             </tr>
                                         ))}
-                                        {users.length === 0 && (
-                                            <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No hay usuarios.</td></tr>
+                                        {filteredUsers.length === 0 && (
+                                            <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No se encontraron usuarios.</td></tr>
                                         )}
                                     </tbody>
                                 </table>
