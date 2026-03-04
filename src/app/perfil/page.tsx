@@ -154,7 +154,6 @@ export default function ProfileDashboard() {
         setCurrentPetId(null);
         setPetName(''); setBreed(''); setAgeYears(''); setMedicalNotes(''); setAvatarUrl('');
         setError(''); setSuccess('');
-        setIsEditingPet(false);
     };
 
     const handleEditPetClick = (pet: any) => {
@@ -197,6 +196,7 @@ export default function ProfileDashboard() {
                 setSuccess('¡Nueva mascota añadida a la familia!');
             }
             resetPetForm();
+            setIsEditingPet(false);
         } catch (err: any) {
             setError(err.message || 'Error guardando mascota');
         } finally {
@@ -209,7 +209,10 @@ export default function ProfileDashboard() {
         const { error } = await supabase.from('pets').delete().eq('id', id);
         if (!error) {
             setPets(pets.filter(p => p.id !== id));
-            if (currentPetId === id) resetPetForm();
+            if (currentPetId === id) {
+                resetPetForm();
+                setIsEditingPet(false);
+            }
         } else {
             alert('Error eliminando mascota: ' + error.message);
         }
@@ -350,7 +353,7 @@ export default function ProfileDashboard() {
                         {/* Lista de Mascotas (Izquierda) */}
                         <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <button
-                                onClick={() => { setIsEditingPet(true); resetPetForm(); }}
+                                onClick={() => { resetPetForm(); setIsEditingPet(true); }}
                                 style={{ padding: '1rem', border: '2px dashed var(--border-color)', borderRadius: 'var(--radius-lg)', backgroundColor: 'transparent', color: 'var(--text-main)', fontSize: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'var(--transition)' }}
                                 onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary-color)'}
                                 onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
